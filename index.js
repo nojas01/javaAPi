@@ -1,17 +1,21 @@
 // index.js
 const express = require('express')
 const bodyParser = require('body-parser')
-const { recipes, users } = require('./routes')
+const passport = require('./config/auth')
+
+const { recipes, users, sessions } = require('./routes')
 
 const PORT = process.env.PORT || 3030
 
 let app = express()
   .use(bodyParser.urlencoded({ extended: true }))
   .use(bodyParser.json())
+  .use(passport.initialize())
 
   // Our routes
   .use(recipes)
   .use(users)
+  .use(sessions)
 
 // catch 404 and forward to error handler
 app.use((req, res, next) => {
