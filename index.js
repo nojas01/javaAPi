@@ -1,11 +1,20 @@
+
+// index.js
 const express = require('express')
+const { Recipe } = require('./models') // this works because of the index file!
 
 const PORT = process.env.PORT || 3030
 
 let app = express()
 
-app.get('/', (req, res) => {
-  res.send('Hello from Express!\n')
+app.get('/recipes', (req, res, next) => {
+  Recipe.find()
+    // Newest recipes first
+    .sort({ createdAt: -1 })
+    // Send the data in JSON format
+    .then((recipes) => res.json(recipes))
+    // Forward any errors to error handler
+    .catch((error) => next(error))
 })
 
 app.listen(PORT, () => {
