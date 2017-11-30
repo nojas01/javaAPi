@@ -1,20 +1,31 @@
-
 // index.js
 const express = require('express')
-const { Recipe } = require('./models') // this works because of the index file!
+const bodyParser = require('body-parser')
+const { recipes } = require('./routes')
 
 const PORT = process.env.PORT || 3030
 
 let app = express()
+  .use(bodyParser.urlencoded({ extended: true }))
+  .use(bodyParser.json())
 
-app.get('/recipes', (req, res, next) => {
-  Recipe.find()
-    // Newest recipes first
-    .sort({ createdAt: -1 })
-    // Send the data in JSON format
-    .then((recipes) => res.json(recipes))
-    // Forward any errors to error handler
-    .catch((error) => next(error))
+  // Our routes
+  .use(recipes)
+
+// catch 404 and forward to error handler
+app.use((req, res, next) => {
+  const error = new Error('Not Found')
+  error.status = 404
+  next(error)
+})
+
+app.use((err, req, res, next) => {
+  res.status(err.status || 500)
+  res.json({
+    message: err.message,
+    // only print full errors in development
+    error: app.get('env') === 'development' ? err : {}
+  })
 })
 
 app.listen(PORT, () => {
