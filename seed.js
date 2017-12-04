@@ -1,48 +1,33 @@
-const request = require('superagent')
-const recipes = require('./db/fixtures/recipes.json')
-const user = require('./db/fixtures/user.json')
+// const recipes = require('db/fixtures.recipes.json')
 
-const createUrl = (path) => {
-  return `${process.env.HOST || `http://localhost:${process.env.PORT || 3030}`}${path}`
-}
+const host = 'http://localhost:3030'
 
-const createRecipes = (token) => {
-  return recipes.map((recipe) => {
-    return request
-      .post(createUrl('/recipes'))
-      .set('Authorization', `Bearer ${token}`)
-      .send(recipe)
+//create a user
+// POST /users
+fetch(`${HOST}/users`. {
+  method: 'POST',
+  body: user
+})
+  .then(() => {
+      //authenticate as the user
+      // POST /sessions
+      fetch(`${HOST}/sessions`, {
+        method: 'POST',
+        body: {
+          email: user.email,
+          password: user.password
+        }
+      })
+      .then((res) => res.json())
       .then((res) => {
-        console.log('Recipe seeded...', res.body.title)
+        const {token } = res
+        console.log('authenticated! Token:', token)
       })
-      .catch((err) => {
-        console.error('Error seeding recipe!', err)
-      })
+    .catch((err => console.log(err)
+  ))
   })
+const user = {
+  name: 'Jamie Gulliver',
+  email: 'jamie@mail.com',
+  password: '123456',
 }
-
-const authenticate = (email, password) => {
-  request
-    .post(createUrl('/sessions'))
-    .send({ email, password })
-    .then((res) => {
-      console.log('Authenticated!')
-      return createRecipes(res.body.token)
-    })
-    .catch((err) => {
-      console.error('Failed to authenticate!', err.message)
-    })
-}
-
-request
-  .post(createUrl('/users'))
-  .send(user)
-  .then((res) => {
-    console.log('User created!')
-    return authenticate(user.email, user.password)
-  })
-  .catch((err) => {
-    console.error('Could not create user', err.message)
-    console.log('Trying to continue...')
-    authenticate(user.email, user.password)
-  })
