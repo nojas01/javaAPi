@@ -14,7 +14,7 @@ router
 
         const { _id, name, email, createdAt, updatedAt } = user
 
-        res.status(201).json({ _id, name, email, createdAt, updatedAt })
+        res.status(201).json({ _id, name, email, createdAt, updatedAt }, message='succes')
       })
     })
 
